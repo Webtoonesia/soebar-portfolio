@@ -11,7 +11,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [portfolios, setPortfolios] = useState([]);
+  const [portfolios, setPortfolios] =  useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -38,7 +38,7 @@ export default function Home() {
     if (isLoadMore) setLoadingMore(true); else setLoading(true);
 
     try {
-      const { data, error } = await supabase
+      const { data = [], error } = await supabase
         .from('portfolios')
         .select('*')
         .order('created_at', { ascending: false })
