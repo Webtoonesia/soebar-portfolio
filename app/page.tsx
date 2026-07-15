@@ -11,7 +11,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [portfolios, setPortfolios] =  useState<any[]>([]);
+  const [portfolios, setPortfolios] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -33,12 +33,12 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchPortfolios = async (isLoadMore = false) => {
+  const fetchPortfolios = async (isLoadMore: boolean = false) => {
     const limit = isLoadMore ? LOAD_MORE_LIMIT : INITIAL_LIMIT;
     if (isLoadMore) setLoadingMore(true); else setLoading(true);
 
     try {
-      const { data = [], error } = await supabase
+      const { data, error } = await supabase
         .from('portfolios')
         .select('*')
         .order('created_at', { ascending: false })
@@ -46,14 +46,17 @@ export default function Home() {
 
       if (error) throw error;
 
-      if (isLoadMore) setPortfolios(prev => [...prev, ...data]);
-      else setPortfolios(data);
+      // Pastikan data tidak bernilai null sebelum melakukan spread operator
+      const safeData = data || [];
 
-      setCurrentOffset(prev => prev + data.length);
+      if (isLoadMore) setPortfolios(prev => [...prev, ...safeData]);
+      else setPortfolios(safeData);
 
-      if (data.length < limit) {
+      setCurrentOffset(prev => prev + safeData.length);
+
+      if (safeData.length < limit) {
         setHasMore(false);
-        if (isLoadMore && data.length === 0) showToast('Semua karya sudah ditampilkan.', 'info', 'Portfolio Info');
+        if (isLoadMore && safeData.length === 0) showToast('Semua karya sudah ditampilkan.', 'info', 'Portfolio Info');
       }
     } catch (error) {
       console.error('Data fetch error:', error);
@@ -64,7 +67,7 @@ export default function Home() {
     }
   };
 
-  const showToast = (message, type = 'success', customTitle = null) => {
+  const showToast = (message: string, type: string = 'success', customTitle: string | null = null) => {
     let title = customTitle || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Information');
     setToast({ show: true, message, type, title });
     setTimeout(() => setToast(prev => ({ ...prev, show: false })), 4000);
@@ -72,13 +75,13 @@ export default function Home() {
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
-  const handleSmoothScroll = (e, targetId) => {
+  const handleSmoothScroll = (e: React.MouseEvent, targetId: string) => {
     e.preventDefault();
     const targetElement = document.getElementById(targetId);
     if (targetElement) {
       const headerOffset = 80; 
       const elementPosition = targetElement.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
       window.scrollTo({ top: offsetPosition, behavior: "smooth" });
     }
     setIsMobileMenuOpen(false);

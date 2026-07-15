@@ -11,9 +11,14 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export default function PortfolioDetail() {
   const params = useParams();
-  const slugOrTitleParam = params?.slug ? decodeURIComponent(params.slug) : null;
+  
+  // Memastikan slug bertipe string tunggal sebelum di-decode
+  const rawSlug = params?.slug;
+  const slugString = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
+  const slugOrTitleParam = slugString ? decodeURIComponent(slugString) : null;
 
-  const [item, setItem] = useState(null);
+  // Menambahkan tipe <any> agar tidak memicu error tipe implisit
+  const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   
@@ -60,7 +65,8 @@ export default function PortfolioDetail() {
     fetchDetail();
   }, [slugOrTitleParam]);
 
-  const showToast = (message, type = 'success', customTitle = null) => {
+  // Menambahkan type annotations pada parameter fungsi
+  const showToast = (message: string, type: string = 'success', customTitle: string | null = null) => {
     const title = customTitle || (type === 'success' ? 'Berhasil' : 'Informasi');
     setToast({ show: true, message, type, title });
     setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
