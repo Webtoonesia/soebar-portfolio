@@ -144,12 +144,17 @@ export default function PortfolioDetail() {
       <header className="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            <a href="/" className="flex-shrink-0 flex items-center cursor-pointer">
+            {/* Header Logo + Text Soebar Design yang Baru */}
+            <a href="/" className="flex-shrink-0 flex items-center gap-3 cursor-pointer group">
               <img 
                 src="https://i.ibb.co.com/DqrJXZ3/logo.webp" 
                 alt="Soebar Design Logo" 
-                className="h-10 w-auto object-contain" 
+                className="h-10 w-auto object-contain transition-transform group-hover:scale-105" 
               />
+              <span className="font-extrabold text-xl tracking-tight">
+                <span className="text-[#2C2E33]">Soebar</span>
+                <span className="text-[#B58D55] ml-1">Design</span>
+              </span>
             </a>
             <nav className="hidden md:flex space-x-8">
               <a href="/" className="text-slate-500 hover:text-[#B58D55] font-medium transition-colors">Home</a>
