@@ -1,12 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useState, useEffect } from 'react';
-
-// [PENTING] 
-// Untuk environment pratinjau (preview) ini, kita menggunakan CDN esm.sh agar tidak terjadi error "Could not resolve".
-// SAAT DEPLOY KE NETLIFY / LOKAL, hapus baris import esm.sh di bawah ini dan gunakan import standar berikut:
-// import { createClient } from '@supabase/supabase-js';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from '@supabase/supabase-js';
 
 // Konfigurasi Supabase
 const SUPABASE_URL = 'https://lfwcyavmwpjfwuiemdjv.supabase.co';
@@ -41,7 +38,6 @@ export default function Home() {
   useEffect(() => {
     fetchPortfolios();
     fetchTools();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchPortfolios = async (isLoadMore: boolean = false) => {
@@ -57,6 +53,7 @@ export default function Home() {
 
       if (error) throw error;
 
+      // Pastikan data tidak bernilai null sebelum melakukan spread operator
       const safeData = data || [];
 
       if (isLoadMore) setPortfolios(prev => [...prev, ...safeData]);
@@ -117,6 +114,7 @@ export default function Home() {
   return (
     <div className="antialiased selection:bg-[#B58D55] selection:text-white bg-slate-50 text-[#2C2E33] min-h-screen flex flex-col font-sans">
       
+      {}
       {/* HEADER */}
       <header className={`fixed w-full top-0 z-50 transition-all duration-300 border-b border-gray-200 ${isScrolled ? 'bg-white/95 shadow-md' : 'bg-white/80 backdrop-blur-md'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -159,6 +157,7 @@ export default function Home() {
         )}
       </header>
 
+      {}
       {/* HERO SECTION */}
       <section id="home" className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-slate-50 flex-grow">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full overflow-hidden -z-10 pointer-events-none">
@@ -169,7 +168,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-[#2C2E33]">
             Visualize Ideas with <br className="hidden md:block" />
-            <span className="text-[#B58D55]">Motion & Typography</span>
+            <span className="text-[#B58D55]">Motion &amp; Typography</span>
           </h1>
           <p className="mt-4 max-w-2xl text-lg md:text-xl text-slate-500 mx-auto mb-10">
             Explore premium motion design and typography works. Download 4K resolution videos or HTML project files for your creative needs.
@@ -185,6 +184,7 @@ export default function Home() {
         </div>
       </section>
 
+      {}
       {/* PORTFOLIO SECTION */}
       <section id="portfolio" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -252,6 +252,7 @@ export default function Home() {
         </div>
       </section>
 
+      {}
       {/* TOOLS BANNER SECTION */}
       <section className="bg-[#2C2E33] py-16 relative overflow-hidden">
         {/* Dekorasi Background */}
@@ -260,7 +261,7 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-4 text-white">Tools & <span className="text-[#B58D55]">Resources</span></h2>
+            <h2 className="text-3xl font-bold mb-4 text-white">Tools &amp; <span className="text-[#B58D55]">Resources</span></h2>
             <p className="text-gray-400 max-w-2xl mx-auto text-sm md:text-base">
               Kumpulan software dan sumber daya kreatif yang biasa saya gunakan dalam proses desain dan pengembangan.
             </p>
@@ -302,17 +303,18 @@ export default function Home() {
         </div>
       </section>
 
+      {}
       {/* FOOTER */}
       <footer id="about" className="bg-white border-t border-gray-200 pt-16 pb-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             <div>
-              {/* Logo Footer agar sejajar dengan Teks "Soebar Design" */}
-              <div className="flex items-center gap-3 mb-4">
+              {/* Logo Footer agar sejajar dengan Teks "Soebar Design" seperti di Header */}
+              <div className="flex items-center gap-3 mb-4 cursor-pointer group" onClick={(e) => handleSmoothScroll(e, 'home')}>
                 <img 
                   src="https://i.ibb.co.com/DqrJXZ3/logo.webp" 
                   alt="Soebar Design Logo" 
-                  className="h-10 w-auto object-contain" 
+                  className="h-10 w-auto object-contain transition-transform group-hover:scale-105" 
                 />
                 <span className="font-extrabold text-xl tracking-tight">
                   <span className="text-[#2C2E33]">Soebar</span>
@@ -348,6 +350,7 @@ export default function Home() {
         </div>
       </footer>
 
+      {}
       {/* TOAST NOTIFICATION COMPONENT */}
       <div 
         className={`fixed bottom-5 right-5 text-[#2C2E33] px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 transform transition-all duration-300 z-[100] border bg-white ${toast.show ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'} ${toast.type === 'success' ? 'border-[#B58D55] border-l-4' : toast.type === 'error' ? 'border-red-400 border-l-4' : 'border-blue-400 border-l-4'}`}
