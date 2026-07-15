@@ -24,8 +24,12 @@ export default function Home() {
   const [tools, setTools] = useState<any[]>([]);
   const [loadingTools, setLoadingTools] = useState(true);
 
-  // State untuk Toast Notification
+  // State untuk Toast Notification biasa
   const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
+
+  // State BARU untuk Modal Proses Unduhan (Sesuai Screenshot)
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   const INITIAL_LIMIT = 6;
   const LOAD_MORE_LIMIT = 3;
@@ -54,7 +58,6 @@ export default function Home() {
 
       if (error) throw error;
 
-      // Solusi TypeScript: pastikan data selalu berupa array
       const safeData = data || [];
 
       if (isLoadMore) setPortfolios(prev => [...prev, ...safeData]);
@@ -112,7 +115,7 @@ export default function Home() {
     setIsMobileMenuOpen(false);
   };
 
-  // Fungsi khusus untuk menangani unduhan tools
+  // Fungsi khusus untuk menangani unduhan tools dengan MODAL PROGRESS (Sesuai Screenshot)
   const handleToolDownload = (e: React.MouseEvent, toolName: string, downloadUrl: string) => {
     e.preventDefault();
     
@@ -121,14 +124,27 @@ export default function Home() {
       return;
     }
 
-    showToast(`Menyiapkan file ${toolName}...`, 'info', 'Processing');
-    
-    // Memberikan jeda sebelum mendownload agar animasi toast terlihat serasi
-    setTimeout(() => {
-      showToast('Memulai unduhan...', 'success', 'Success');
-      // Mengarahkan ke link download di tab yang sama
-      window.location.href = downloadUrl;
-    }, 1500);
+    // Tampilkan modal download & reset progress ke 0
+    setIsDownloading(true);
+    setDownloadProgress(0);
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      // Menaikkan progress secara acak agar simulasi terasa alami
+      progress += Math.floor(Math.random() * 12) + 6;
+      
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        
+        // Tahan sebentar di 100% lalu jalankan pengunduhan di jendela yang sama
+        setTimeout(() => {
+          setIsDownloading(false);
+          window.location.href = downloadUrl;
+        }, 600);
+      }
+      setDownloadProgress(progress);
+    }, 120);
   };
 
   return (
@@ -138,7 +154,6 @@ export default function Home() {
       <header className={`fixed w-full top-0 z-50 transition-all duration-300 border-b border-gray-200 ${isScrolled ? 'bg-white/95 shadow-md' : 'bg-white/80 backdrop-blur-md'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            {/* Header Logo + Text Soebar Design */}
             <div className="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onClick={(e) => handleSmoothScroll(e, 'home')}>
               <img 
                 src="https://i.ibb.co.com/DqrJXZ3/logo.webp" 
@@ -176,7 +191,6 @@ export default function Home() {
         )}
       </header>
 
-      {}
       {/* HERO SECTION */}
       <section id="home" className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-slate-50 flex-grow">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full overflow-hidden -z-10 pointer-events-none">
@@ -203,7 +217,6 @@ export default function Home() {
         </div>
       </section>
 
-      {}
       {/* PORTFOLIO SECTION */}
       <section id="portfolio" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -271,10 +284,8 @@ export default function Home() {
         </div>
       </section>
 
-      {}
       {/* TOOLS BANNER SECTION */}
       <section className="bg-[#2C2E33] py-16 relative overflow-hidden">
-        {/* Dekorasi Background */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-[#B58D55] opacity-10 blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl pointer-events-none"></div>
 
@@ -320,13 +331,11 @@ export default function Home() {
         </div>
       </section>
 
-      {}
       {/* FOOTER */}
       <footer id="about" className="bg-white border-t border-gray-200 pt-16 pb-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             <div>
-              {/* Logo Footer agar sejajar dengan Teks "Soebar Design" seperti di Header */}
               <div className="flex items-center gap-3 mb-4 cursor-pointer group" onClick={(e) => handleSmoothScroll(e, 'home')}>
                 <img 
                   src="https://i.ibb.co.com/DqrJXZ3/logo.webp" 
@@ -376,6 +385,38 @@ export default function Home() {
           <p className="text-xs text-slate-500 mt-1">{toast.message}</p>
         </div>
       </div>
+
+      {/* MODAL PROSES UNDUHAN (Sesuai Persis dengan Screenshot) */}
+      {isDownloading && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4 transition-all duration-300 animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-[340px] w-full p-8 shadow-2xl flex flex-col items-center text-center transform scale-100 transition-all duration-300 animate-zoom-in">
+            {/* Circle Icon Container */}
+            <div className="w-16 h-16 rounded-full bg-[#B58D55]/10 flex items-center justify-center text-[#B58D55] mb-6">
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </div>
+            
+            {/* Teks Dialog */}
+            <h3 className="text-lg font-bold text-[#2C2E33] mb-2">Mempersiapkan Unduhan</h3>
+            <p className="text-xs text-slate-500 leading-relaxed mb-6">
+              File Anda sedang diproses. Silakan tunggu sebentar..
+            </p>
+            
+            {/* Progress Bar Container */}
+            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mb-3">
+              <div 
+                className="bg-[#B58D55] h-full rounded-full transition-all duration-150 ease-out" 
+                style={{ width: `${downloadProgress}%` }}
+              ></div>
+            </div>
+            
+            {/* Progress Percentage */}
+            <span className="text-xs font-bold text-[#B58D55]">{downloadProgress}%</span>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
