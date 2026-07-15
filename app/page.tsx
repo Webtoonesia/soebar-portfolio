@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
+
+// [PENTING] 
+// Untuk environment pratinjau (preview) ini, kita menggunakan CDN esm.sh agar tidak terjadi error "Could not resolve".
+// SAAT DEPLOY KE NETLIFY / LOKAL, hapus baris import esm.sh di bawah ini dan gunakan import standar berikut:
+// import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // Konfigurasi Supabase
 const SUPABASE_URL = 'https://lfwcyavmwpjfwuiemdjv.supabase.co';
@@ -9,6 +14,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export default function Home() {
+  // State untuk Portfolio
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [portfolios, setPortfolios] = useState<any[]>([]);
@@ -17,6 +23,10 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [currentOffset, setCurrentOffset] = useState(0);
   
+  // State untuk Tools
+  const [tools, setTools] = useState<any[]>([]);
+  const [loadingTools, setLoadingTools] = useState(true);
+
   const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
 
   const INITIAL_LIMIT = 6;
@@ -30,6 +40,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchPortfolios();
+    fetchTools();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -46,7 +57,6 @@ export default function Home() {
 
       if (error) throw error;
 
-      // Pastikan data tidak bernilai null sebelum melakukan spread operator
       const safeData = data || [];
 
       if (isLoadMore) setPortfolios(prev => [...prev, ...safeData]);
@@ -64,6 +74,23 @@ export default function Home() {
     } finally {
       setLoading(false);
       setLoadingMore(false);
+    }
+  };
+
+  const fetchTools = async () => {
+    setLoadingTools(true);
+    try {
+      const { data, error } = await supabase
+        .from('tools')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTools(data || []);
+    } catch (error) {
+      console.error('Tools fetch error:', error);
+    } finally {
+      setLoadingTools(false);
     }
   };
 
@@ -225,12 +252,73 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TOOLS BANNER SECTION */}
+      <section className="bg-[#2C2E33] py-16 relative overflow-hidden">
+        {/* Dekorasi Background */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-[#B58D55] opacity-10 blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4 text-white">Tools & <span className="text-[#B58D55]">Resources</span></h2>
+            <p className="text-gray-400 max-w-2xl mx-auto text-sm md:text-base">
+              Kumpulan software dan sumber daya kreatif yang biasa saya gunakan dalam proses desain dan pengembangan.
+            </p>
+          </div>
+
+          {loadingTools ? (
+            <div className="text-center text-gray-400 animate-pulse">Memuat data tools...</div>
+          ) : tools.length === 0 ? (
+            <div className="text-center text-gray-500 italic">Belum ada tools yang ditambahkan.</div>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+              {tools.map((tool) => (
+                <a 
+                  key={tool.id} 
+                  href={tool.download_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="bg-[#1f2024] border border-gray-700 hover:border-[#B58D55] rounded-xl p-4 flex items-center gap-4 w-full md:w-[320px] transition-all duration-300 group hover:-translate-y-1 shadow-lg"
+                >
+                  <div className="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center flex-shrink-0 text-[#B58D55] group-hover:bg-[#B58D55] group-hover:text-white transition-colors overflow-hidden">
+                    {tool.icon_url ? (
+                      <img src={tool.icon_url} alt={tool.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-sm group-hover:text-[#B58D55] transition-colors">{tool.name}</h3>
+                    {tool.description && (
+                      <p className="text-gray-400 text-xs mt-1 line-clamp-1">{tool.description}</p>
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer id="about" className="bg-white border-t border-gray-200 pt-16 pb-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             <div>
-              <img src="https://i.ibb.co.com/DqrJXZ3/logo.webp" alt="Soebar Design" className="h-10 w-auto mb-4" />
+              {/* Logo Footer agar sejajar dengan Teks "Soebar Design" */}
+              <div className="flex items-center gap-3 mb-4">
+                <img 
+                  src="https://i.ibb.co.com/DqrJXZ3/logo.webp" 
+                  alt="Soebar Design Logo" 
+                  className="h-10 w-auto object-contain" 
+                />
+                <span className="font-extrabold text-xl tracking-tight">
+                  <span className="text-[#2C2E33]">Soebar</span>
+                  <span className="text-[#B58D55] ml-1">Design</span>
+                </span>
+              </div>
               <p className="text-slate-500 text-sm leading-relaxed">
                 Portfolio and creative resource platform. Providing high-quality templates, motion graphic videos, and typography for your project needs.
               </p>
@@ -255,7 +343,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-200 pt-8 text-center">
-            <p className="text-slate-400 text-sm">&copy; 2026 Soebar Design. Made with creative enthusiasm.</p>
+            <p className="text-slate-400 text-sm">&copy; {new Date().getFullYear()} Soebar Design. Made with creative enthusiasm.</p>
           </div>
         </div>
       </footer>
