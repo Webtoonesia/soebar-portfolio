@@ -17,14 +17,23 @@ export default function PortfolioDetail() {
   const slugString = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
   const slugOrTitleParam = slugString ? decodeURIComponent(slugString) : null;
 
-  // Menambahkan tipe <any> agar tidak memicu error tipe implisit
+  // State utama detail portofolio
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   
+  // State interaksi UI & Animasi
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!slugOrTitleParam) {
@@ -65,7 +74,6 @@ export default function PortfolioDetail() {
     fetchDetail();
   }, [slugOrTitleParam]);
 
-  // Menambahkan type annotations pada parameter fungsi
   const showToast = (message: string, type: string = 'success', customTitle: string | null = null) => {
     const title = customTitle || (type === 'success' ? 'Berhasil' : 'Informasi');
     setToast({ show: true, message, type, title });
@@ -141,10 +149,10 @@ export default function PortfolioDetail() {
   return (
     <div className="antialiased bg-slate-50 text-[#2C2E33] flex flex-col min-h-screen font-sans">
       
-      <header className="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 transition-all duration-300">
+      <header className={`fixed w-full top-0 z-50 transition-all duration-300 border-b border-gray-200 ${isScrolled ? 'bg-white/95 shadow-md' : 'bg-white/80 backdrop-blur-md'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            {/* Header Logo + Text Soebar Design yang Baru */}
+            {/* Header Logo + Text Soebar Design */}
             <a href="/" className="flex-shrink-0 flex items-center gap-3 cursor-pointer group">
               <img 
                 src="https://i.ibb.co.com/DqrJXZ3/logo.webp" 
@@ -156,11 +164,35 @@ export default function PortfolioDetail() {
                 <span className="text-[#B58D55] ml-1">Design</span>
               </span>
             </a>
+            
+            {/* Navigasi Desktop yang Serasi dengan Homepage */}
             <nav className="hidden md:flex space-x-8">
-              <a href="/" className="text-slate-500 hover:text-[#B58D55] font-medium transition-colors">Home</a>
+              <a href="/#home" className="text-slate-600 hover:text-[#B58D55] font-medium transition-colors">Home</a>
+              <a href="/#portfolio" className="text-slate-600 hover:text-[#B58D55] font-medium transition-colors">Portfolio</a>
+              <a href="/#about" className="text-slate-600 hover:text-[#B58D55] font-medium transition-colors">About</a>
             </nav>
+
+            {/* Tombol Hamburger Menu Mobile */}
+            <div className="md:hidden flex items-center">
+              <button className="text-[#2C2E33] hover:text-[#B58D55] focus:outline-none" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
+        
+        {/* Menu Dropdown Mobile */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-b border-gray-200 absolute w-full shadow-lg">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <a href="/#home" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-slate-600 hover:text-[#B58D55] hover:bg-slate-50 rounded-md">Home</a>
+              <a href="/#portfolio" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-slate-600 hover:text-[#B58D55] hover:bg-slate-50 rounded-md">Portfolio</a>
+              <a href="/#about" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-slate-600 hover:text-[#B58D55] hover:bg-slate-50 rounded-md">About</a>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="flex-grow pt-32 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -226,6 +258,7 @@ export default function PortfolioDetail() {
               </div>
             </div>
 
+            {/* Sidebar Details and Download Widget */}
             <div className="lg:col-span-4 relative">
               <div className="sticky top-28 bg-white border border-gray-200 rounded-3xl p-6 shadow-lg shadow-slate-200/50">
                 
@@ -271,26 +304,76 @@ export default function PortfolioDetail() {
         )}
       </main>
 
-      <footer className="bg-white border-t border-gray-200 py-8 mt-auto text-center">
-        <p className="text-slate-400 text-sm">&copy; 2026 Soebar Design. All rights reserved.</p>
+      <footer id="about" className="bg-white border-t border-gray-200 pt-16 pb-8 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            <div>
+              <div className="flex items-center gap-3 mb-4 cursor-pointer group">
+                <img 
+                  src="https://i.ibb.co.com/DqrJXZ3/logo.webp" 
+                  alt="Soebar Design Logo" 
+                  className="h-10 w-auto object-contain transition-transform group-hover:scale-105" 
+                />
+                <span className="font-extrabold text-xl tracking-tight">
+                  <span className="text-[#2C2E33]">Soebar</span>
+                  <span className="text-[#B58D55] ml-1">Design</span>
+                </span>
+              </div>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Portfolio and creative resource platform. Providing high-quality templates, motion graphic videos, and typography for your project needs.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-[#2C2E33] font-semibold mb-4 text-lg">Quick Links</h4>
+              <ul className="space-y-2">
+                <li><a href="/#home" className="text-slate-500 hover:text-[#B58D55] transition-colors text-sm font-medium cursor-pointer">Home</a></li>
+                <li><a href="/#portfolio" className="text-slate-500 hover:text-[#B58D55] transition-colors text-sm font-medium cursor-pointer">Video Collection</a></li>
+                <li><button onClick={() => showToast('Design templates are free to use for personal and commercial purposes.', 'info', 'License & Usage')} className="text-slate-500 hover:text-[#B58D55] transition-colors text-sm font-medium text-left">License & Usage</button></li>
+                <li><button onClick={() => showToast('Click the download button on the detail page to save files.', 'info', 'Help')} className="text-slate-500 hover:text-[#B58D55] transition-colors text-sm font-medium text-left">How to Download</button></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-[#2C2E33] font-semibold mb-4 text-lg">Contact Me</h4>
+              <p className="text-slate-500 text-sm mb-4">Have questions or need a custom design?</p>
+              <div className="flex space-x-4">
+                <a href="mailto:hello@soebardesign.com" className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:text-white hover:bg-[#B58D55] transition-all shadow-sm">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-200 pt-8 text-center">
+            <p className="text-slate-400 text-sm">&copy; {new Date().getFullYear()} Soebar Design. Made with creative enthusiasm.</p>
+          </div>
+        </div>
       </footer>
 
-      {/* MODAL POPUP DOWNLOAD */}
       {showDownloadModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl transform scale-100 transition-transform">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-[#B58D55]/20 text-[#B58D55] rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-              </div>
-              <h3 className="text-xl font-bold text-[#2C2E33] mb-2">Mempersiapkan Unduhan</h3>
-              <p className="text-sm text-slate-500 mb-6">File Anda sedang diproses. Silakan tunggu sebentar...</p>
-              
-              <div className="w-full bg-gray-100 rounded-full h-2.5 mb-2 overflow-hidden">
-                <div className="bg-[#B58D55] h-2.5 rounded-full transition-all duration-300 ease-out" style={{ width: `${downloadProgress}%` }}></div>
-              </div>
-              <p className="text-xs font-semibold text-[#B58D55]">{downloadProgress}%</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4 transition-all duration-300">
+          <div className="bg-white rounded-2xl max-w-[340px] w-full p-8 shadow-2xl flex flex-col items-center text-center transform scale-100 transition-all duration-300">
+            {/* Circle Icon Container */}
+            <div className="w-16 h-16 rounded-full bg-[#B58D55]/10 flex items-center justify-center text-[#B58D55] mb-6">
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
             </div>
+            
+            {/* Teks Dialog */}
+            <h3 className="text-lg font-bold text-[#2C2E33] mb-2">Mempersiapkan Unduhan</h3>
+            <p className="text-xs text-slate-500 leading-relaxed mb-6">
+              File Anda sedang diproses. Silakan tunggu sebentar..
+            </p>
+            
+            {/* Progress Bar Container */}
+            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mb-3">
+              <div 
+                className="bg-[#B58D55] h-full rounded-full transition-all duration-150 ease-out" 
+                style={{ width: `${downloadProgress}%` }}
+              ></div>
+            </div>
+            
+            {/* Progress Percentage */}
+            <span className="text-xs font-bold text-[#B58D55]">{downloadProgress}%</span>
           </div>
         </div>
       )}
